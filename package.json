@@ -1,5 +1,5 @@
 {
-  "name": "boilerplate-authentication-sql",
+  "name": "RealTime Chat App",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -7,7 +7,9 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsx src/index.ts",
     "generate": "npx drizzle-kit generate",
-    "migrate": "npx drizzle-kit migrate"
+    "migrate": "npx drizzle-kit migrate",
+    "push": "npx drizzle-kit push",
+    "pull": "npx drizzle-kit pull"
   },
   "keywords": [],
   "author": "",
@@ -46,6 +48,8 @@
     "nodemailer": "^9.0.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
     "sql2": "^0.0.1",
     "zod": "^4.4.3"
   }

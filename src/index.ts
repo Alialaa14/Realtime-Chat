@@ -8,13 +8,20 @@ import session from "express-session";
 import { type Request, type Response, type NextFunction } from "express";
 import { type ApiErrType } from "./types/ApiError.types.ts";
 import userRouter from "./routers/user.router.ts";
+import contactRouter from "./routers/contact.router.ts";
+import groupRouter from "./routers/group-chat.router.ts";
 import { Passport } from "./utils/googleoAuth.ts";
 import { removePicsFromLocal } from "./helpers/removeLocalPics.ts";
+import "./utils/IntializeSocket.ts";
+import app from "./utils/IntializeSocket.ts";
 
-const app = express();
 app.use(express.json());
 app.use(morgan("dev"));
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+  }),
+);
 app.use(cookieParser());
 app.use(
   session({
@@ -36,6 +43,8 @@ app.use(Passport.session());
 export const db = await connectDatabase();
 
 app.use("/api/v1/auth", userRouter);
+app.use("/api/v1/contact", contactRouter);
+app.use("/api/v1/group", groupRouter);
 app.use((req: Request, res: Response, next: NextFunction) => {
   return res.status(404).json({ message: "Route not found" });
 });
@@ -46,8 +55,4 @@ app.use((err: ApiErrType, req: Request, res: Response, next: NextFunction) => {
   return res
     .status(err.statusCode || 500)
     .json({ message: err.message, errorType: err.errorType, success: false });
-});
-
-app.listen(ENV.PORT, () => {
-  console.log("Server running on port 3000");
 });

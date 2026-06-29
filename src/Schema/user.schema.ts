@@ -10,6 +10,7 @@ const User = mysqlTable("users", {
   id: int().autoincrement().primaryKey(),
   username: varchar({ length: 50 }).notNull(),
   email: varchar({ length: 50 }).notNull().unique(),
+  phoneNumber: varchar({ length: 20 }).notNull(),
   password: varchar("password", { length: 255 })
     .$type<string | null>()
     .default(null),
@@ -20,7 +21,6 @@ const User = mysqlTable("users", {
   RefreshToken: varchar({ length: 255 }),
   picture_url: varchar({ length: 255 }),
   picture_id: varchar({ length: 255 }),
-  role: varchar({ length: 50 }).notNull().default("user"),
   otp: varchar({ length: 6 }),
   otpExpiry: timestamp("otpExpiry", { mode: "date" }),
 });

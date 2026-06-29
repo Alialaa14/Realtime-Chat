@@ -4,7 +4,7 @@ import ApiResponse from "../helpers/ApiResponse.ts";
 import ApiError from "../helpers/ApiError.ts";
 import User from "../Schema/user.schema.ts";
 import { db } from "../index.ts";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { ENV } from "../helpers/ENV.ts";
 import { StatusCodes } from "http-status-codes";
@@ -26,14 +26,14 @@ import { Passport } from "../utils/googleoAuth.ts";
 
 export const register = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { username, email, password } = req.body;
+    const { username, email, phoneNumber, password } = req.body;
     const file = req.file;
 
     if (!file) return next(new ApiError("Please Provide Us Your Image", 400));
     const checkExistingUser = await db
       .select()
       .from(User)
-      .where(eq(User.email, email));
+      .where(and(eq(User.email, email), eq(User.phoneNumber, phoneNumber)));
 
     if (checkExistingUser.length > 0)
       return next(new ApiError("Email is Already Registered", 409));
@@ -58,6 +58,7 @@ export const register = asyncHandler(
       .values({
         username,
         email,
+        phoneNumber: phoneNumber,
         password: hashedPassword,
         picture_url: secure_url,
         picture_id: public_id,
@@ -74,6 +75,7 @@ export const register = asyncHandler(
         isOnline: User.isOnline,
         picture_url: User.picture_url,
         picture_id: User.picture_id,
+        phoneNumber: User.phoneNumber,
       })
       .from(User)
       .where(eq(User.id, newUser[0]?.id || 0));
@@ -369,61 +371,62 @@ export const refreshAccessToken = asyncHandler(
   },
 );
 
-export const googleCallback = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    Passport.authenticate(
-      "google",
-      {
-        failureRedirect: "/login",
-        successRedirect: "/api/v1/auth/dashboard",
-      },
-      async (error, profile) => {
-        if (error)
-          return res
-            .status(StatusCodes.BAD_REQUEST)
-            .json(
-              new ApiError("Something Went Wrong", StatusCodes.BAD_REQUEST),
-            );
-        if (!profile) return res.redirect("/api/v1/auth/login");
+// export const googleCallback = asyncHandler(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     Passport.authenticate(
+//       "google",
+//       {
+//         failureRedirect: "/login",
+//         successRedirect: "/api/v1/auth/dashboard",
+//       },
+//       async (error, profile) => {
+//         if (error)
+//           return res
+//             .status(StatusCodes.BAD_REQUEST)
+//             .json(
+//               new ApiError("Something Went Wrong", StatusCodes.BAD_REQUEST),
+//             );
+//         if (!profile) return res.redirect("/api/v1/auth/login");
 
-        let user: any = await db
-          .select()
-          .from(User)
-          .where(eq(User.email, profile.emails[0].value));
+//         let user: any = await db
+//           .select()
+//           .from(User)
+//           .where(eq(User.email, profile.emails[0].value));
 
-        if (user.length === 0) {
-          user = await db
-            .insert(User)
-            .values({
-              email: profile.emails[0].value,
-              username: profile.displayName,
-              picture_url: profile.photos[0].value,
-              isOnline: true,
-              googleId: profile.id,
-            })
-            .$returningId();
-        }
-        req.logIn(user[0].id, (err) => {
-          console.log(err);
-          if (err) return res.redirect("/api/v1/auth/login");
-          return res.redirect("/api/v1/auth/dashboard");
-        });
-      },
-    )(req, res, next);
-  },
-);
+//         if (user.length === 0) {
+//           user = await db
+//             .insert(User)
+//             .values({
+//               email: profile.emails[0].value,
+//               username: profile.displayName,
+//               picture_url: profile.photos[0].value,
+//               isOnline: true,
+//               googleId: profile.id,
 
-export const googleLogout = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    req.logout(function (err) {
-      if (err) {
-        return next(
-          new ApiError("Something Went Wrong", StatusCodes.BAD_REQUEST),
-        );
-      }
-      return res
-        .status(StatusCodes.OK)
-        .json(new ApiResponse(true, "Logout Success", null));
-    });
-  },
-);
+//             })
+//             .$returningId();
+//         }
+//         req.logIn(user[0].id, (err) => {
+//           console.log(err);
+//           if (err) return res.redirect("/api/v1/auth/login");
+//           return res.redirect("/api/v1/auth/dashboard");
+//         });
+//       },
+//     )(req, res, next);
+//   },
+// );
+
+// export const googleLogout = asyncHandler(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     req.logout(function (err) {
+//       if (err) {
+//         return next(
+//           new ApiError("Something Went Wrong", StatusCodes.BAD_REQUEST),
+//         );
+//       }
+//       return res
+//         .status(StatusCodes.OK)
+//         .json(new ApiResponse(true, "Logout Success", null));
+//     });
+//   },
+// );

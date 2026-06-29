@@ -8,7 +8,6 @@ import {
   forgotPassword,
   verifyOtp,
   updateUser,
-  googleLogout,
   refreshAccessToken,
 } from "../Controllers/user.controllers.ts";
 import { upload } from "../utils/multer.ts";
@@ -22,7 +21,7 @@ import {
   updateProfileSchema,
 } from "../validationSchemas/userValidationSchema.ts";
 import { Passport } from "../utils/googleoAuth.ts";
-import { googleCallback } from "../Controllers/user.controllers.ts";
+// import { googleCallback } from "../Controllers/user.controllers.ts";
 import { isAuthenticatedRefreshToken } from "../Middlewares/isAuthenticatedRefreshToken.ts";
 
 const router = Router();
@@ -61,8 +60,8 @@ router.get(
   Passport.authenticate("google", { scope: ["email", "profile"] }),
 );
 
-router.get("/google/callback", googleCallback);
-router.get("/google-auth-logout", isAuthenticated, googleLogout);
+// router.get("/google/callback", googleCallback);
+// router.get("/google-auth-logout", isAuthenticated, googleLogout);
 
 router.get("/dashboard", isAuthenticated, (req, res, next) => {
   return res.json(req.user);
