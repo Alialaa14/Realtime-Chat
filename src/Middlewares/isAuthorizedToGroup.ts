@@ -7,8 +7,7 @@ export const isAdmin = () => {
   return async (req: any, res: Response, next: NextFunction) => {
     try {
       const userId: number = Number(req.user?.id);
-      const groupId: number = Number(req.query?.id);
-      console.log(groupId);
+      const groupId: number = Number(req.params?.id);
       const isAdminUser = await db
         .select({ admin: ConversatiomMem.admin })
         .from(ConversatiomMem)

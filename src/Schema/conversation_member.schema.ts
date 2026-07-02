@@ -11,6 +11,7 @@ const Members = mysqlTable("conversation-memb", {
   userId: int().notNull(),
   joindAt: timestamp().notNull(),
   leftAt: timestamp(),
+  clearedAt: timestamp(),
   admin: boolean().default(false),
 });
 

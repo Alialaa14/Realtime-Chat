@@ -50,7 +50,6 @@ export const register = asyncHandler(
     );
 
     // Helper To Remove Local Pics from Local Device
-
     removePicsFromLocal(req.file?.path || "");
 
     const newUser = await db

@@ -9,7 +9,6 @@ import {
 const Conversation = mysqlTable("conversation", {
   conversationId: int().primaryKey().notNull().autoincrement(),
   type: varchar({ length: 5, enum: ["chat", "group"] }).notNull(),
-  admin: int().notNull(),
   description: varchar({ length: 255 }),
   group_pic: varchar({ length: 255 }),
   group_pic_id: varchar({ length: 255 }),

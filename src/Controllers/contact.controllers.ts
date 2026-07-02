@@ -14,8 +14,8 @@ export const createContact = asyncHandler(
     const userId = req.user?.id;
     console.log(typeof phoneNumber);
     console.log(typeof userId);
-    const findCreatedUser = await db
-      .select({ phonNumber: User.phoneNumber })
+    const [findCreatedUser] = await db
+      .select({ userId: User.id, phonNumber: User.phoneNumber })
       .from(User)
       .where(eq(User.phoneNumber, phoneNumber));
 
@@ -33,11 +33,16 @@ export const createContact = asyncHandler(
 
     let usingPlatform: boolean = true;
 
-    if (findCreatedUser.length == 0) usingPlatform = false;
+    if (!findCreatedUser) usingPlatform = false;
 
     const createContact = await db
       .insert(Contact)
-      .values({ userId, name, phoneNumber, usingPlatform })
+      .values({
+        userId: findCreatedUser?.userId!,
+        name,
+        phoneNumber,
+        usingPlatform,
+      })
       .$returningId();
 
     console.log(createContact);

@@ -4,6 +4,7 @@ import http from "http";
 import express from "express";
 import { isAuthenticatedSocket } from "../Middlewares/isAuthenticatedSocket.ts";
 import { recieveMessage } from "../Controllers/message.controllers.ts";
+import { generateRoomId } from "../Controllers/chat-group.controllers.ts";
 const app = express();
 export const server = http.createServer(app);
 export const io = new Server(server, {
@@ -19,7 +20,8 @@ io.on("connection", (socket: any) => {
   const socketId = socket.id;
   connectedUsers.set(userId, socketId);
   console.log(`New User Connted To Socket ${socket.id}`);
-
+  // Socket Controllers for Group
+  generateRoomId(io, socket);
   recieveMessage(io, socket);
 
   socket.on("disconnect", (socket: any) => {

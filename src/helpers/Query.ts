@@ -28,6 +28,7 @@ class Query {
     limit: number = 10,
     page: number = 1,
     order: typeof asc = asc,
+    errMsg: string = "Data Not Found",
     sortBy?: Column,
   ) {
     const skip = (page - 1) * limit;
@@ -42,39 +43,54 @@ class Query {
         .limit(limit)
         .offset(skip)
         .orderBy(order(column)),
-      "Data Not Found",
+      errMsg,
       404,
     );
   }
 
-  async getOne(selector: {} = {}, operator: SQL) {
+  async getOne(
+    selector: {} = {},
+    operator: SQL | undefined,
+    errMsg: string = "Data Not Found",
+  ) {
     return await this.resolveRead(
-      db.select(selector).from(this.model).where(operator),
-      "Data Not Found",
+      db.select(selector).from(this.model).where(operator).limit(1),
+      errMsg,
       404,
     );
   }
+  async exists(operator: SQL | undefined) {
+    const result = await db.select().from(this.model).where(operator).limit(1);
+    return result.length > 0;
+  }
 
-  async create(data: {}[] | {}) {
+  async create(data: {}[] | {}, errMsg: string = "Error While Creating Data") {
     return this.resolveWrite(
       db.insert(this.model).values(data).$returningId(),
-      "Error While Creating Data",
+      errMsg,
       500,
     );
   }
 
-  async update(data: {}, operator: SQL) {
+  async update(
+    data: {},
+    operator: SQL | undefined,
+    errMsg: string = "Error While Updating Data",
+  ) {
     return await this.resolveWrite(
       db.update(this.model).set(data).where(operator),
-      "Error While Updating Data",
+      errMsg,
       500,
     );
   }
 
-  async delete(operator: SQL) {
+  async delete(
+    operator: SQL | undefined,
+    errMsg: string = "Error While Deleting Data",
+  ) {
     return await this.resolveWrite(
       db.delete(this.model).where(operator),
-      "Error While Deleting Data",
+      errMsg,
       500,
     );
   }
@@ -84,6 +100,7 @@ class Query {
     selector: {},
     joinOperator: SQL,
     whereOperator?: SQL,
+    errMsg: string = "Data Not Found in database",
     limit: number = 10,
     page: number = 1,
     order: typeof asc = asc,
@@ -102,7 +119,7 @@ class Query {
         .limit(limit)
         .offset(skip)
         .orderBy(order(column)),
-      "Data Not Found",
+      errMsg,
       404,
     );
   }
@@ -112,9 +129,11 @@ class Query {
     selector: {},
     joinOperator: SQL,
     whereOperator?: SQL,
+    errMsg: string = "Data Not Found",
     limit: number = 10,
     page: number = 1,
     order: typeof asc = asc,
+
     sortBy?: Column,
   ) {
     const skip = (page - 1) * limit;
@@ -130,7 +149,7 @@ class Query {
         .limit(limit)
         .offset(skip)
         .orderBy(order(column)),
-      "Data Not Found",
+      errMsg,
       404,
     );
   }
@@ -138,11 +157,13 @@ class Query {
   async innerJoin(
     s_model: any,
     selector: {},
-    joinOperator: SQL,
+    joinOperator: SQL | undefined,
     whereOperator?: SQL,
+    errMsg: string = "Data Not Found",
     limit: number = 10,
     page: number = 1,
     order: typeof asc = asc,
+
     sortBy?: Column,
   ) {
     const skip = (page - 1) * limit;
@@ -159,7 +180,7 @@ class Query {
         .limit(limit)
         .offset(skip)
         .orderBy(order(column)),
-      "Data Not Found",
+      errMsg,
       404,
     );
   }
@@ -170,8 +191,9 @@ class Query {
     statusCode: number = 404,
   ) {
     const result = await query;
+    console.log(result);
     if (!result || result.length === 0) {
-      throw new ApiError(errMessage || "Data Not Found", statusCode);
+      throw new ApiError(errMessage, statusCode);
     }
     return result;
   }
@@ -183,7 +205,7 @@ class Query {
   ) {
     const result = await query;
     if (!result) {
-      throw new ApiError(errMessage || "Operation Failed", statusCode);
+      throw new ApiError(errMessage, statusCode);
     }
     return result;
   }
